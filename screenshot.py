@@ -1,6 +1,8 @@
 # coding:utf-8
 from selenium import webdriver
 import re
+import os
+import psutil
 
 # 載入 lists.txt
 url_lists = []
@@ -19,14 +21,30 @@ options.add_argument("--hide-scrollbars")
 # 建立 Chrome Driver
 driver = webdriver.Chrome(options=options)
 
+# 建立圖片資料夾
+dir_name = 'images'
+
+if not os.path.exists(dir_name):
+    os.mkdir(dir_name)
+
+print('------------------------------')
+
+# 依序截圖
 for i in url_lists:
     driver.get(i)
     print(driver.title)
-    str = re.sub(
-        r'https://www\.|http://www\.|https://www|http://|https://|www\.|.com|.tw|.io|.org|.webflow|events\.|event\.|', "", i).strip('/')
-    str = re.sub(
-        r'\/|\.', "-", str)
-    driver.save_screenshot('images/'+str+'.png')
+    name = re.sub(r'\/|\.', "-", re.sub(
+        r'https://www\.|http://www\.|https://www|http://|https://|www\.|.com|.tw|.io|.org|.webflow|events\.|event\.|', "", i).strip('/'))
+    driver.save_screenshot(dir_name+'/'+name+'.png')
 
-driver.close()
-print('DONE')
+driver.quit()
+
+print('------------------------------')
+print('DONE :) see in '+dir_name+'/')
+
+# 刪除背景 `chromedriver`
+PROCNAME = "chromedriver"
+for proc in psutil.process_iter():
+    if proc.name() == PROCNAME:
+        proc.kill()
+        print('Kill '+PROCNAME)
